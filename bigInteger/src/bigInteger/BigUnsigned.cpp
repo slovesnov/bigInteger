@@ -11,8 +11,7 @@
 #include <cstdlib>//strtoul
 #include <sstream>
 
-namespace NumberFormatter{
-std::string formatString(std::string const& b, const unsigned positions,
+std::string BigUnsigned::formatString(std::string const& b, const unsigned positions,
 		const char separator) {
 	if(positions==0){
 		return b;
@@ -28,20 +27,6 @@ std::string formatString(std::string const& b, const unsigned positions,
 	}
 	return s;
 }
-
-std::string uint64_tToString(const uint64_t& value ) {
-    std::ostringstream os;
-    os << value;
-    return os.str();
-}
-
-std::string uint64_tToHexString(const uint64_t& value ) {
-    std::ostringstream os;
-    os <<std::hex<< value;
-    return os.str();
-}
-
-};//namespace NumberFormatter
 
 void BigUnsigned::allocate(unsigned newSize) {
 	if(size!=newSize){
@@ -178,7 +163,7 @@ std::string BigUnsigned::toHexString(const unsigned positions, const char separa
 		}
 		s+=b;
 	}while(p--!=data);
-	return NumberFormatter::formatString(s,positions,separator);
+	return formatString(s,positions,separator);
 }
 
 BigUnsigned BigUnsigned::operator+(BigUnsigned const& u)const{
@@ -531,7 +516,7 @@ std::string BigUnsigned::prepareString(const char* s, bool& hex) {
 	else{
 		hex=false;
 	}
-	for(;*p=='0' || *p==NumberFormatter::DEFAULT_SEPARATOR;p++);
+	for(;*p=='0' || *p==DEFAULT_SEPARATOR;p++);
 	if(*p==0){
 		return "0";//only zeros and DEFAULT_SEPARATORs
 	}
@@ -543,7 +528,7 @@ std::string BigUnsigned::prepareString(const char* s, bool& hex) {
 		if(isdigit(*p) || (hex && ((*p>='a' && *p<='f') || (*p>='A' && *p<='F')) ) ){
 			r+=*p;
 		}
-		else if(*p!=NumberFormatter::DEFAULT_SEPARATOR){
+		else if(*p!=DEFAULT_SEPARATOR){
 			BIGNUMBER_ASSERT(0,hex ? "invalid symbol in hex string": "invalid symbol in decimal string");
 		}
 	}
@@ -701,7 +686,7 @@ std::string BigUnsigned::hexToDecString(const char* _s, const unsigned positions
 	}
 
 	delete[]data;
-	return NumberFormatter::formatString(sdec,positions,separator);
+	return formatString(sdec,positions,separator);
 }
 
 void BigUnsigned::div(const BigUnsigned& divisor, BigUnsigned& quotient,
@@ -933,6 +918,16 @@ double BigUnsigned::toDouble() const {
 	return v;
 }
 
+long double BigUnsigned::toLongDouble()const{
+	int i;
+	long double v = 0;
+	for (i = 0; i <int(size); i++) {
+		v += data[i] * ::powl(2, sizeof(base) * 8*i);
+	}
+	return v;
+}
+
+
 std::pair<double, int> BigUnsigned::getMantissaExponent() const {
 	double v = toDouble();
 	if (v == 0) {
@@ -940,6 +935,29 @@ std::pair<double, int> BigUnsigned::getMantissaExponent() const {
 	}
 	double exponent = floor(log10(v));
 	return {v / ::pow(10, exponent),exponent};
+}
+
+std::pair<double, int> BigUnsigned::getMantissaExponentLongDouble() const {
+	long double v = toLongDouble();
+	if (v == 0) {
+		return {0,0};
+	}
+	long double exponent = floorl(log10l(v));
+	return {v / ::powl(10, exponent),exponent};
+}
+
+BigUnsigned BigUnsigned::binomial(unsigned k,unsigned n){
+	BigUnsigned r = 1;
+	unsigned i;
+	/* for big n,k
+	 * C(n,k)=n*C(n-1,k-1)/k
+	 * C(n,k)=n*C(n-1,k-1)/k=(n/k)*(n-1/k-1)...(n-k+1/1)C(n-k,0); C(n-k,0)=1
+	 */
+	for (i = 1; i <= k; i++) {
+		r *= n - k + i;
+		r /= i;
+	}
+	return r;
 }
 
 std::ostream& operator<<(std::ostream& o, BigUnsigned const& u){

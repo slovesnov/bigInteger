@@ -9,10 +9,12 @@
 #define FRACTION_H_
 
 #include "BigUnsigned.h"
-#include <stdlib.h>//_abs64 strtoull
 #include <sstream>
 
 template<typename type=BigUnsigned>class Fraction{
+	static const unsigned DEFAULT_POSITIONS=BigUnsigned::DEFAULT_POSITIONS;//no separation by default
+	static const char DEFAULT_SEPARATOR=BigUnsigned::DEFAULT_SEPARATOR;
+
 public:
 	bool positive;
 	type dividend,divider;//dividend/divider
@@ -219,13 +221,13 @@ N(/=,/)
 	}
 
 	static std::string format(type t,
-			const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR){
-		return NumberFormatter::formatString(typeToString(t),positions,separator);
+			const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR){
+		return BigUnsigned::formatString(typeToString(t),positions,separator);
 	}
 
-	std::string toString(const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const {
+	std::string toString(const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const {
 		std::string s;
 		if(!positive && dividend!=0){
 			s+='-';
@@ -242,8 +244,8 @@ N(/=,/)
 		printf("%s%s",toString().c_str(),s);
 	}
 
-	std::string specialString(bool latex,const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	std::string specialString(bool latex,const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		std::string s=positive?"+":"-";
 		if(divider==1){
 			if(dividend!=1){

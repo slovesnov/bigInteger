@@ -5,9 +5,10 @@
  *      Author: alexey slovesnov
  */
 
-#include "Fraction.h"
-#include "BigInteger.h"
-#include <assert.h>
+#include <cassert>
+
+#include "bigInteger/Fraction.h"
+#include "bigInteger/BigInteger.h"
 
 //#define USE_UINT64
 

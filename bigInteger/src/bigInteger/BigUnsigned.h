@@ -12,34 +12,6 @@
 #include <utility>
 #include "BigNumberException.h"
 
-namespace NumberFormatter{
-	static const unsigned DEFAULT_POSITIONS=0;//no separation by default
-	static const char DEFAULT_SEPARATOR=',';
-
-	//formatString("1234567",3,',')="1,234,567"
-	std::string formatString(std::string const&,const unsigned positions=DEFAULT_POSITIONS, const char separator=DEFAULT_SEPARATOR);
-
-	/* Note
-	 * PRIu64 universal macro
-	 * sometimes "%llu" depends on includes
-	 * sometimes "%I64u" depends on includes
-	 *
-	 * #define __STDC_FORMAT_MACROS
-	 * #include <inttypes.h>
-	 * sprintf(b,"%"PRIu64, v); //works
-	 *
-	 *
-	 * #include <stdio.h>
-	 * #define __STDC_FORMAT_MACROS
-	 * #include <inttypes.h>
-	 * sprintf(b,"%"PRIu64, v); //warning because of #include <stdio.h>
-	 *
-	 * use universal way
-	 */
-	std::string uint64_tToString(const uint64_t&);
-	std::string uint64_tToHexString(const uint64_t&);
-};
-
 class BigUnsigned{
 #define BASE_SIZE 4
 
@@ -73,6 +45,12 @@ class BigUnsigned{
 	static uint64_t pow10(const unsigned k);
 
 public:
+	//public for BigInteger, Fraction
+	static const unsigned DEFAULT_POSITIONS=0;//no separation by default
+	static const char DEFAULT_SEPARATOR=',';
+
+	//formatString("1234567",3,',')="1,234,567"
+	static std::string formatString(std::string const&,const unsigned positions=DEFAULT_POSITIONS, const char separator=DEFAULT_SEPARATOR);
 
 	/**
 	 * Note order of functions
@@ -152,48 +130,48 @@ public:
 	}
 
 	//begin string functions
-	std::string toHexString(const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const;
+	std::string toHexString(const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const;
 
-	std::string to0xHexString(const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	std::string to0xHexString(const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		return "0x"+toHexString(positions,separator);
 	}
 
-	std::string toDecString(const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	std::string toDecString(const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		return hexToDecString(to0xHexString(),positions,separator);
 	}
 
-	std::string toString(const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	std::string toString(const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		return toDecString(positions,separator);
 	}
 
 	//"0xabcd" -> "43981"
 	static std::string hexToDecString(const char* s,
-			const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR);
+			const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR);
 
 	//"0xabcd" -> "43981"
 	static std::string hexToDecString(const std::string& s,
-			const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR){
+			const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR){
 		return hexToDecString(s.c_str(),positions,separator);
 	}
 
 	//"43981" -> "abcd"
 	static std::string decToHexString(const char* s,
-			const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR){
+			const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR){
 		BigUnsigned u(s);
 		return u.toHexString(positions,separator);
 	}
 
 	//"43981" -> "abcd"
 	static std::string decToHexString(const std::string& s,
-			const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR){
+			const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR){
 		return decToHexString(s.c_str(),positions,separator);
 	}
 	//
@@ -509,8 +487,10 @@ N(>=,<)
 	uint64_t toUint64_t()const;
 
 	double toDouble()const;
+	long double toLongDouble()const;
 
 	std::pair<double,int> getMantissaExponent()const;
+	std::pair<double,int> getMantissaExponentLongDouble()const;
 	/*
 	 * Note
 	 * operator+(const int& t) {return *this=*this+int64_t(t);}
@@ -557,10 +537,14 @@ N(>=,<)
 	#undef N
 	#undef M
 
-	void print(const char *s="",const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	void print(const char *s="",const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		printf("%s%s",toString(positions,separator).c_str(),s);
 	}
+
+	static BigUnsigned binomial(unsigned k,unsigned n);
+
+
 };
 
 /**

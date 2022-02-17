@@ -8,12 +8,14 @@
 #ifndef BIGINTEGER_H_
 #define BIGINTEGER_H_
 
-#include <cstdlib>//_abs64
 #include "BigUnsigned.h"
 
 class BigInteger{
 	BigUnsigned u;
 	bool positive;//>=0
+
+	static const unsigned DEFAULT_POSITIONS=BigUnsigned::DEFAULT_POSITIONS;//no separation by default
+	static const char DEFAULT_SEPARATOR=BigUnsigned::DEFAULT_SEPARATOR;
 
 public:
 	BigInteger(){
@@ -54,7 +56,7 @@ public:
 
 	BigInteger const& operator=(const int64_t& t){
 		positive=t>=0;
-		u=_abs64(t);
+		u=llabs(t);
 		return *this;
 	}
 
@@ -83,8 +85,8 @@ public:
 	}
 
 	//begin string functions
-	std::string toHexString(const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	std::string toHexString(const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		std::string s;
 		if(!positive){
 			s+='-';
@@ -92,8 +94,8 @@ public:
 		return s+u.toHexString(positions,separator);
 	}
 
-	std::string to0xHexString(const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	std::string to0xHexString(const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		std::string s;
 		if(!positive){
 			s+='-';
@@ -101,21 +103,21 @@ public:
 		return s+u.to0xHexString(positions,separator);
 	}
 
-	std::string toDecString(const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	std::string toDecString(const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		std::string s;
 		if(!positive){
 			s+='-';
 		}
 		return s+u.toDecString(positions,separator);
 	}
-	std::string toString(const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	std::string toString(const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		return toDecString(positions,separator);
 	}
 
-	void print(const char *s="",const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR)const{
+	void print(const char *s="",const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR)const{
 		printf("%s%s",toString(positions,separator).c_str(),s);
 	}
 
@@ -296,6 +298,10 @@ public:
 		return BigUnsigned::factorial(n);
 	}
 
+	static BigInteger binomial(unsigned k,unsigned n){
+		return BigUnsigned::binomial(k, n);
+	}
+
 	void div(BigInteger const& divisor,BigInteger& quotient,BigInteger& remainder)const{//this=quotient*divisor+remainder
 		remainder.positive=quotient.positive=positive == divisor.positive;//-5/2=-2*2-1
 		u.div(divisor.u,quotient.u,remainder.u);
@@ -303,35 +309,40 @@ public:
 
 	//"0xabcd" -> "43981"
 	static std::string hexToDecString(const std::string& s,
-			const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR){
+			const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR){
 		return BigUnsigned::hexToDecString(s,positions,separator);
 	}
 
 	//"0xabcd" -> "43981"
 	static std::string hexToDecString(const char* s,
-			const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR){
+			const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR){
 		return BigUnsigned::hexToDecString(s,positions,separator);
 	}
 
 	//"43981" -> "abcd"
 	static std::string decToHexString(const char* s,
-			const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR){
+			const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR){
 		return BigUnsigned::decToHexString(s,positions,separator);
 	}
 
 	//"43981" -> "abcd"
 	static std::string decToHexString(const std::string& s,
-			const unsigned positions=NumberFormatter::DEFAULT_POSITIONS,
-			const char separator=NumberFormatter::DEFAULT_SEPARATOR){
+			const unsigned positions=DEFAULT_POSITIONS,
+			const char separator=DEFAULT_SEPARATOR){
 		return BigUnsigned::decToHexString(s,positions,separator);
 	}
 
 
 	double toDouble()const{
 		double v = u.toDouble();
+		return positive ? v : -v;
+	}
+
+	long double toLongDouble()const{
+		long double v = u.toLongDouble();
 		return positive ? v : -v;
 	}
 
@@ -342,6 +353,15 @@ public:
 		}
 		return p;
 	}
+
+	std::pair<double,int> getMantissaExponentLongDouble()const{
+		auto p=u.getMantissaExponentLongDouble();
+		if(!positive){
+			p.first=-p.first;
+		}
+		return p;
+	}
+
 
 };
 

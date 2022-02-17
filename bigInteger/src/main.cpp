@@ -6,8 +6,9 @@
  */
 
 
-#include <stdio.h>
-#include <time.h>
+#include <cstdio>
+
+#include "bigInteger/BigInteger.h"
 
 void sumPower_bernoulli();
 
@@ -16,8 +17,6 @@ int main (int argc, char *argv[]){
 
 	sumPower_bernoulli();
 
-	printf("time %.3lf, the end\n",double(clock() - begin)/CLOCKS_PER_SEC);
+	printf("time %.3lf, the end\n", double(clock() - begin) / CLOCKS_PER_SEC);
 
-  return 0;
 }
-
